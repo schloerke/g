@@ -1,0 +1,289 @@
+#!/bin/bash
+
+## put in ~/.gitconfig
+# [alias]
+#   st = status
+# [push]
+#   default = matching
+#
+# [color]
+#   branch = auto
+#   diff = auto
+#   status = auto
+#
+# [color "branch"]
+#   current = yellow reverse
+#   local = yellow
+#   remote = green
+#
+# [color "diff"]
+#   meta = yellow bold
+#   frag = magenta bold
+#   old = red bold
+#   new = green bold
+#
+# [color "status"]
+#   added = yellow
+#   changed = green
+#   untracked = cyan
+
+__git_ps1 ()
+{
+  local g="$(git rev-parse --git-dir 2>/dev/null)"
+  if [ -n "$g" ]; then
+    local r
+    local b
+    if [ -d "$g/../.dotest" ]
+    then
+      r="|AM/REBASE"
+      b="$(git symbolic-ref HEAD 2>/dev/null)"
+    elif [ -f "$g/.dotest-merge/interactive" ]
+    then
+      r="|REBASE-i"
+      b="$(cat $g/.dotest-merge/head-name)"
+    elif [ -d "$g/.dotest-merge" ]
+    then
+      r="|REBASE-m"
+      b="$(cat $g/.dotest-merge/head-name)"
+    elif [ -f "$g/MERGE_HEAD" ]
+    then
+      r="|MERGING"
+      b="$(git symbolic-ref HEAD 2>/dev/null)"
+    else
+      if [ -f $g/BISECT_LOG ]
+      then
+        r="|BISECTING"
+      fi
+      if ! b="$(git symbolic-ref HEAD 2>/dev/null)"
+      then
+        b="$(cut -c1-7 $g/HEAD)..."
+      fi
+    fi
+    if [ -n "$1" ]; then
+      printf "$1" "${b##refs/heads/}$r"
+    else
+      printf " (%s)" "${b##refs/heads/}$r"
+    fi
+  fi
+}
+## make the git branch cyan in the prompt
+#export PS1='`__git_ps1 "\[\033[0;36m\][%s]\[\033[0m\] "`\W: '
+
+
+_g ()   #  By convention, the function name
+{                 #+ starts with an underscore.
+  local cmd="${1##*/}"
+  local word=${COMP_WORDS[COMP_CWORD]}
+  local line=${COMP_LINE}
+  line=`echo "$line" | sed 's/^ *//g'`
+  local trimline=`echo "$line" | sed 's/ *$//g'`
+
+  COMPREPLY=()   # Array variable storing the possible completions.
+
+  local spaces=`echo "$line." | tr -dc ' ' | wc -c | sed 's/^ *//g'`
+
+  # echo "cmd:    '$cmd'"
+  # echo "word:   '$word'"
+  # echo "line:   '$line'"
+  # echo "spaces: '$spaces'"
+
+  case "$spaces" in
+    1)
+
+    COMPREPLY=( $( compgen -W 'branches b a add add_all_deleted cherry co com coma d db diff dc diff_commit delete_global_remote delete_local_branch l l_all lp make_branch merge merge_into_single patch pp prune pullo pusho resolve revert s stash sd stash_drop sl stash_list sp stash_pop ss stash_show_files ssp stash_show_diff st status undo unstage pull push svn_clone svn_clone_standard mv upstream_fetch upstream_merge upstream_set' -- $word ) );;
+
+    *)
+
+      set_compreply ()
+      {
+        local ret=`echo $* | tr -d '\n'`
+        COMPREPLY=( $( compgen -W "$ret" -- $word ) )
+      }
+
+      local secondword=`echo "$trimline" | cut -d ' ' -f2`
+      # echo "secondword: '$secondword'"
+
+      local lastchar=${line: -1}
+      # if it's not two words... aka something is being started, then don't do anything
+
+      case "$secondword" in
+        a|add|add_all_deleted|coma|undo|unstage)
+          # show the current status
+          if [ "$lastchar" != " " ]; then return 0; fi
+          echo ""; echo ""
+          case "$secondword" in
+            a|add)           echo "add files";;
+            add_all_deleted) echo "add files that have been removed";;
+            coma)            echo "add altered files and commit with message";;
+            undo)            echo "undo file changes";;
+            unstage)         echo "unstage file commits";;
+          esac
+          echo ""
+          git status
+          #returns nothing, but defaults to the file system (set in the complete command)
+        ;;
+
+        b|branches|com|d|diff|dc|l|l_all|lp|make_branch|mv|patch|pp|prune|pull|pullo|push|pusho|resolve|s|stash|sl|stash_list|st)
+          # just print the message
+          if [ "$lastchar" != " " ]; then return 0; fi
+          echo ""; echo ""
+          case "$secondword" in
+            b|branches)    echo "show current branches (enter)";;
+            com)           echo "commit with message (enter message in quotes)";;
+            d|diff)        echo "show current diff (enter)";;
+            dc)            echo "show diff of committed files to remote (enter)";;
+            l)             echo "last 15 logs in pretty format (enter)";;
+            l_all)         echo "all logs in pretty format (enter)";;
+            lp)            echo "git log per file (enter)";;
+            make_branch)   echo "create local and global branch (enter new branch name)";;
+            mv)            echo "move a file within git";;
+            patch)         echo "show you every chunk, and ask you whether you want to add it or not";;
+            pp)            echo "git pull; git push (enter)";;
+            prune)         echo "clean up the git repo (enter)";;
+            pull)          echo "git pull ((origin) master)";;
+            pullo)         echo "git pull origin (master)";;
+            #              pullr) echo "git pull --rebase *";;
+            push)          echo "git push ((origin) master)";;
+            pusho)         echo "git push origin (master)";;
+            resolve)       echo "open all merge conflicts in sublime (enter)";;
+            s|stash)       echo "save the current working changes into a stash (enter)";;
+            sl|stash_list) echo "show the stash list (enter)";;
+            st)            echo "git status (enter)";;
+          esac
+        ;;
+
+        cherry|revert)
+          # show the latest SHA commits
+          if [ "$lastchar" == " " ]; then
+            echo ""; echo ""
+            case "$secondword" in
+              cherry) echo "cherry pick a commit into the current branch";;
+              revert)
+                # http://blog.oio.de/2013/05/08/how-to-rollback-changes-with-git/
+                echo "revert to an older commit.  (adds a new commit undoing what you just did)"
+                echo ""
+                echo "!!!!!  ENTER THE LAST BAD SHA  !!!!!"
+                echo ""
+                echo "A - B - C"
+                echo "g revert C"
+                echo "A - B - C - D"
+                echo "D == B"
+              ;;
+            esac
+            #print out the last 10 commits but only do it if no tag has been started
+            echo ""
+            g l_all -n 10 | cat
+            echo ""
+          fi
+
+          set_compreply `git log --graph --pretty=format:'%h' --abbrev-commit | grep '*' | sed 's/[\*| ]*//' | cut -c1-7`
+        ;;
+
+        co|db|delete_local_branch|merge|merge_into_single)
+          # show local branches and global remotes and autocomplete the local branches
+          if [ "$lastchar" == " " ]; then
+            echo ""; echo ""
+            case "$secondword" in
+              co)                  echo "checkout branch";;
+              db)                  echo "show current diff to a branch";;
+              delete_local_branch) echo "remove branch from local git repo";;
+              merge)               echo "merge another branch" ;;
+              merge_into_single)   echo "merge into a branch by making all commits into one overall commit.  Good to do into the master branch" ;;
+            esac
+            # show branches if nothing has been started
+            echo ""
+            g branches
+          fi
+
+          # return all branches but the current one
+          set_compreply `git branch | grep -v "^\*" | sed 's/^ *//'`
+        ;;
+
+        delete_global_remote)
+          # show all branches and remotes and auto complete the remotes
+          if [ "$lastchar" == " " ]; then
+            echo ""; echo ""
+            echo "removed remote from global git repo"
+            echo ""
+            # show branches if nothing has been started
+            g branches
+          fi
+
+          set_compreply `git branch -a | grep remotes/ | grep -v HEAD | sed 's/remotes\/origin\///g' | sed 's/[ ]*//g'`
+        ;;
+
+        sd|stash_drop|sp|stash_pop|ss|stash_show_files|ssp|stash_show_diff)
+          # show the current stashes and auto complete them
+          # https://www.kernel.org/pub/software/scm/git/docs/git-stash.html
+          if [ "$lastchar" == " " ]; then
+            echo ""; echo ""
+            case "$secondword" in
+              s|stash)             echo "save the current working changes into a stash" ;;
+              sd|stash_drop)       echo "delete a stash from the list" ;;
+              sp|stash_pop)        echo "pop a stash from the list and apply the changes";;
+              ss|stash_show_files) echo "show the FILE LEVEL diff of a stash and it's original parent";;
+              ssp|stash_show_diff) echo "show the CODE LEVEL diff of a stash and it's original parent";;
+            esac
+            echo ""
+            g sl
+          fi
+          set_compreply `g sl | sed 's/:.*//'`
+        ;;
+
+        svn_clone|svn_clone_standard)
+          # svn_undo|svn_unstage|svn_com|svn_coma|svn_merge|
+
+          # show the current stashes and auto complete them
+          # https://www.kernel.org/pub/software/scm/git/docs/git-stash.html
+          if [ "$lastchar" == " " ]; then
+            echo ""; echo ""
+            case "$secondword" in
+
+              svn_clone)             echo "clone a svn repo and create a git repo to track it" ;;
+              svn_clone_standard)
+                                     echo "clone a repo that is hosted by svn and is in the standard format"
+                                     echo "(trunk/, branches/, and tags/)"
+                                     ;;
+            esac
+            echo ""
+            g st
+          fi
+          set_compreply `g sl | sed 's/:.*//'`
+        ;;
+
+        upstream_fetch|upstream_merge|upstream_set)
+          if [ "$lastchar" == " " ]; then
+            echo ""; echo ""
+            case "$secondword" in
+              upstream_fetch) echo "fetch the latest commits from upstream remote. Does not merge into current branch";;
+              upstream_set)   echo "set the upstream remote to another repo.  (Typically the one that it was forked from)";;
+              upstream_merge) echo "merges upstream (master) branch into current branch";;
+            esac
+          fi
+
+          case "$secondword" in
+            upstream_set|upstream_merge)
+              set_compreply `git branch -a | grep remotes/upstream | sed 's/[ ]*remotes\/upstream\///g'`
+            ;;
+          esac
+        ;;
+      esac
+
+  esac
+
+  return 0
+}
+
+
+# use this function for autocomplete
+# -o default = gives control back to bash when it returns nothing
+complete -o default -F _g g
+
+
+
+
+
+
+
+
+
