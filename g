@@ -134,8 +134,9 @@ merge|merge_into_single)
   if [[ "$#" > 1 ]]
   then
     case "$1" in
-      merge)             git merge "${@:2}";;
-      merge_into_single) git merge --squash "${@:2}";;
+      # --no-edit is NOT RECOMMENDED. But my merges are the same commit anyways
+      merge)             git merge --log --no-edit "${@:2}";;
+      merge_into_single) git merge --log --no-edit --squash "${@:2}";;
     esac
     g b
   else
