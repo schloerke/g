@@ -83,8 +83,7 @@ delete_local_branch)
   ;;
 
 l)
-  g l_all -n 15 "${@:2}" | cat
-  echo ""
+  g l_all -n 15 "${@:2}"
   ;;
 
 l_all)
