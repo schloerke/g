@@ -321,6 +321,7 @@ upstream_set)
   if [[ "$#" > 1 ]]
   then
     git remote add upstream "$2"
+    g upstream_fetch
     g st
   else
     echo "please include another git repo"
