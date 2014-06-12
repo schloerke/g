@@ -36,7 +36,7 @@ cherry)
 co)
   if [[ "$#" > 1 ]]
   then
-    g checkout "${@:2}"
+    g checkout "${@:2}" || g checkout -b "$2" origin/"$2"
     g b
   else
     echo "please include a branch name"

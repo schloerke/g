@@ -183,7 +183,7 @@ _g ()   #  By convention, the function name
           if [ "$lastchar" == " " ]; then
             echo ""; echo ""
             case "$secondword" in
-              co)                  echo "checkout branch";;
+              co)                  echo "checkout branch from origin";;
               db)                  echo "show current diff to a branch";;
               delete_local_branch) echo "remove branch from local git repo";;
               merge)               echo "merge another branch" ;;
