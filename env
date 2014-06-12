@@ -262,7 +262,7 @@ _g ()   #  By convention, the function name
           fi
 
           case "$secondword" in
-            upstream_set|upstream_merge)
+            upstream_fetch|upstream_merge)
               set_compreply `git branch -a | grep remotes/upstream | sed 's/[ ]*remotes\/upstream\///g'`
             ;;
           esac
