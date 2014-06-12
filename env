@@ -15,7 +15,6 @@
 #   current = yellow reverse
 #   local = yellow
 #   remote = green
-#
 # [color "diff"]
 #   meta = yellow bold
 #   frag = magenta bold
@@ -90,7 +89,7 @@ _g ()   #  By convention, the function name
   case "$spaces" in
     1)
 
-    COMPREPLY=( $( compgen -W 'branches b a add add_all_deleted cherry co com coma d db diff dc diff_commit delete_global_remote delete_local_branch l l_all lp make_branch merge merge_into_single patch pp prune pullo pusho resolve revert s stash sd stash_drop sl stash_list sp stash_pop ss stash_show_files ssp stash_show_diff st status undo unstage pull push svn_clone svn_clone_standard mv upstream_fetch upstream_merge upstream_set' -- $word ) );;
+    COMPREPLY=( $( compgen -W 'branches b a add add_all_deleted cherry co com coma d db diff dc diff_commit delete_global_remote delete_local_branch l l_all lp make_branch merge merge_into_single patch pp prune pullo pusho resolve revert s stash sd stash_drop sl stash_list sp stash_pop ss stash_show_files ssp stash_show_diff st status undo unstage pull push svn_clone svn_clone_standard mv upstream_pull upstream_set upstream_merge upstream_fetch' -- $word ) );;
 
     *)
 
@@ -251,13 +250,14 @@ _g ()   #  By convention, the function name
           set_compreply `g sl | sed 's/:.*//'`
         ;;
 
-        upstream_fetch|upstream_merge|upstream_set)
+        upstream_fetch|upstream_merge|upstream_set|upstream_pull)
           if [ "$lastchar" == " " ]; then
             echo ""; echo ""
             case "$secondword" in
-              upstream_fetch) echo "fetch the latest commits from upstream remote. Does not merge into current branch";;
               upstream_set)   echo "set the upstream remote to another repo.  (Typically the one that it was forked from)";;
-              upstream_merge) echo "merges upstream (master) branch into current branch";;
+              upstream_fetch) echo "fetch the latest commits from upstream remote. Does not merge into current branch";;
+              upstream_merge) echo "merges upstream (master) branch into current branch. Does not pull latest changes from upstream";;
+              upstream_pull) echo "fetchs and merges the latest commits from upstream remote";;
             esac
           fi
 

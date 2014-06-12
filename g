@@ -316,6 +316,10 @@ upstream_merge)
   fi
   ;;
 
+upstream_pull)
+  g upstream_fetch
+  g upstream_merge "$2"
+  ;;
 
 upstream_set)
   if [[ "$#" > 1 ]]
