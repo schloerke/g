@@ -318,7 +318,7 @@ upstream_merge)
 
 upstream_pull)
   g upstream_fetch
-  g upstream_merge "$2"
+  g upstream_merge
   ;;
 
 upstream_set)
