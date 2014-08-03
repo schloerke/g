@@ -198,6 +198,10 @@ resolve)
   done
   ;;
 
+squash)
+  g rebase -i "${@:2}"
+  ;;
+
 s|stash)
   git stash "${@:2}"
   ;;

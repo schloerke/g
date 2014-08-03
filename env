@@ -89,7 +89,7 @@ _g ()   #  By convention, the function name
   case "$spaces" in
     1)
 
-    COMPREPLY=( $( compgen -W 'branches b a add add_all_deleted cherry co com coma d db diff dc diff_commit delete_global_remote delete_local_branch l l_all lp make_branch merge merge_into_single patch pp prune pullo pusho resolve revert s stash sd stash_drop sl stash_list sp stash_pop ss stash_show_files ssp stash_show_diff st status undo unstage pull push svn_clone svn_clone_standard mv upstream_pull upstream_set upstream_merge upstream_fetch' -- $word ) );;
+    COMPREPLY=( $( compgen -W 'branches b a add add_all_deleted cherry co com coma d db diff dc diff_commit delete_global_remote delete_local_branch l l_all lp make_branch merge merge_into_single patch pp prune pullo pusho resolve revert squash s stash sd stash_drop sl stash_list sp stash_pop ss stash_show_files ssp stash_show_diff st status undo unstage pull push svn_clone svn_clone_standard mv upstream_pull upstream_set upstream_merge upstream_fetch' -- $word ) );;
 
     *)
 
@@ -178,7 +178,7 @@ _g ()   #  By convention, the function name
           set_compreply `git log --graph --pretty=format:'%h' --abbrev-commit | grep '*' | sed 's/[\*| ]*//' | cut -c1-7`
         ;;
 
-        co|db|delete_local_branch|merge|merge_into_single)
+        co|db|delete_local_branch|merge|merge_into_single|squash)
           # show local branches and global remotes and autocomplete the local branches
           if [ "$lastchar" == " " ]; then
             echo ""; echo ""
@@ -188,6 +188,7 @@ _g ()   #  By convention, the function name
               delete_local_branch) echo "remove branch from local git repo";;
               merge)               echo "merge another branch" ;;
               merge_into_single)   echo "merge into a branch by making all commits into one overall commit.  Good to do into the master branch" ;;
+              squash)              echo "'squash' commits into one commit since reference branch (hash).  Make all lines (except first!) start with 's' and not pick to finalize squash" ;;
             esac
             # show branches if nothing has been started
             echo ""
