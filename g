@@ -193,7 +193,7 @@ resolve)
     FILES=`echo "$STATUS_OUTPUT" | grep "$SET" | sed "s/$SET //"`
     if [ -n "$FILES" ]
     then
-      lime $FILES
+      atom $FILES
     fi
   done
   ;;

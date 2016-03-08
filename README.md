@@ -18,7 +18,7 @@ It contains three major components.
 
 * 'g': this file contains the meat of the functionality.  Place it in your $PATH somewhere.  It's one giant case/switch statement, but it works just fine for speed.  The descriptions are in the 'env' function '_g'. Dont' forget to "chmod +x ./g"
 
-I have a function called 'lime' that opens files into my text editor (used inside resolve).  Replace that as necessary, but it should accept multiple file names.
+I have a function called 'atom' that opens files into my text editor (used inside resolve).  Replace that as necessary, but it should accept multiple file names.
 
 The basic 'g pull' and 'g push' now work for both regular git and git-svn repositories.
 
