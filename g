@@ -278,6 +278,7 @@ push|pull)
   fi
   ;;
 
+# g svn_clone -r HEAD "svn+ssh://centauri.stat.purdue.edu/home/CVSROOT/rainfall-global"
 svn_clone|svn_clone_standard)
   # http://viget.com/extend/effectively-using-git-with-subversion
   # The -s is there to signify that my Subversion repository has a standard layout (trunk/, branches/, and tags/.) If your repository doesn’t have a standard layout, you can leave that off.
@@ -321,21 +322,43 @@ mv)
 
 
 upstream_fetch)
-  g fetch upstream
+  if [ -z "$2" ]
+  then
+    UPSTREAM="upstream"
+  else
+    UPSTREAM="$2"
+  fi
+  echo "Fetching upstream: '$UPSTREAM'"
+  g fetch "$UPSTREAM"
   ;;
 
 upstream_merge)
-  if [[ "$#" > 1 ]]
+  if [ -z $3 ]
   then
-    g merge upstream/"$2"
+    # only branch name
+    UPSTREAM="upstream"
+    if [ -z $2 ]
+    then
+      BRANCH="master"
+    else
+      BRANCH="$2"
+    fi
   else
-    g merge upstream/master
+    UPSTREAM="$2"
+    if [ -z $3 ]
+    then
+      BRANCH="master"
+    else
+      BRANCH="$3"
+    fi
   fi
+  echo "merging from '$UPSTREAM/$BRANCH'"
+  g merge "$UPSTREAM/$BRANCH"
   ;;
 
 upstream_pull)
-  g upstream_fetch
-  g upstream_merge
+  g upstream_fetch "${@:2}"
+  g upstream_merge "${@:2}"
   ;;
 
 upstream_set)
@@ -354,4 +377,3 @@ upstream_set)
   git "$@"
   ;;
 esac
-
