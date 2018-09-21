@@ -231,6 +231,19 @@ st|status)
   git status "${@:2}"
   ;;
 
+tag)
+  if [[ "$#" > 1 ]]
+  then
+    echo "Adding tag: ${@:2}"
+    git tag "${@:2}"
+    g push origin --tags
+    g tag
+  else
+    echo "Current tagged versions:"
+    git tag
+  fi
+  ;;
+
 undo)
   if [[ "$#" > 1 ]]
   then
